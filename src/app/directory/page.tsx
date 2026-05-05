@@ -1,12 +1,6 @@
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getUserByEmail, getVisibleEmployees } from "@/lib/visibility";
-
-const roleLabel: Record<string, string> = {
-  admin: "Admin",
-  manager: "Manager",
-  employee: "Employee"
-};
 
 const roleBadge: Record<string, string> = {
   admin: "bg-purple-100 text-purple-800",
@@ -34,35 +28,11 @@ export default async function DirectoryPage() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Directory</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Signed in as <span className="font-medium">{me.fullName}</span> ·{" "}
-            <span
-              className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${roleBadge[me.role]}`}
-            >
-              {roleLabel[me.role]}
-            </span>
-          </p>
-          <p className="mt-1 text-xs text-gray-500">
-            {visible.length} {visible.length === 1 ? "person" : "people"} visible to you
-          </p>
-        </div>
-
-        <form
-          action={async () => {
-            "use server";
-            await signOut({ redirectTo: "/login" });
-          }}
-        >
-          <button
-            type="submit"
-            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50"
-          >
-            Sign out
-          </button>
-        </form>
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold">Directory</h1>
+        <p className="mt-1 text-xs text-gray-500">
+          {visible.length} {visible.length === 1 ? "person" : "people"} visible to you
+        </p>
       </header>
 
       <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-gray-200">
@@ -104,7 +74,7 @@ export default async function DirectoryPage() {
                     <span
                       className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${roleBadge[u.role]}`}
                     >
-                      {roleLabel[u.role]}
+                      {u.role}
                     </span>
                   </td>
                 </tr>
