@@ -4,8 +4,6 @@ import { getUserByEmail } from "@/lib/visibility";
 import { getReviewByEmployeeId, getUserById } from "@/lib/review-queries";
 import {
   RATING_LABELS,
-  RATING_MAX,
-  RATING_MIN,
   calculateFinalRating,
   effectiveRatings,
   isOverridden,
@@ -17,8 +15,7 @@ import {
   submitManagerRating
 } from "@/app/_actions/reviews";
 import { StatusBadge } from "@/app/_components/StatusBadge";
-
-const ratingOptions = Array.from({ length: RATING_MAX - RATING_MIN + 1 }, (_, i) => RATING_MIN + i);
+import { RatingForm } from "@/app/_components/RatingForm";
 
 export default async function ReviewDetailPage({
   params
@@ -80,26 +77,11 @@ export default async function ReviewDetailPage({
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
             Manager rating
           </h2>
-          <form action={submitManagerRating} className="mt-3 space-y-4">
-            <input type="hidden" name="employee_id" value={employee.id} />
-            <RatingSelect name="kra_rating" label="KRA / Goal Performance (50%)" required />
-            <RatingSelect name="behavioral_rating" label="Behavioral (30%)" required />
-            <RatingSelect name="manager_overall_rating" label="Manager Overall (20%)" required />
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Comments</label>
-              <textarea
-                name="manager_comments"
-                rows={4}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
-              />
-            </div>
-            <button
-              type="submit"
-              className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-            >
-              Submit rating
-            </button>
-          </form>
+          <RatingForm
+            mode="manager"
+            employeeId={employee.id}
+            action={submitManagerRating}
+          />
         </section>
       ) : review && (status === "manager_reviewed" ||
           status === "founder_reviewed" ||
@@ -130,35 +112,14 @@ export default async function ReviewDetailPage({
           <p className="mt-1 text-xs text-gray-500">
             Leave a field blank to keep the manager rating. Provided values override.
           </p>
-          <form action={submitFounderReview} className="mt-3 space-y-4">
-            <input type="hidden" name="employee_id" value={employee.id} />
-            <RatingSelect
-              name="founder_kra_rating"
-              label={`KRA — manager said ${review?.kraRating ?? "—"}`}
-            />
-            <RatingSelect
-              name="founder_behavioral_rating"
-              label={`Behavioral — manager said ${review?.behavioralRating ?? "—"}`}
-            />
-            <RatingSelect
-              name="founder_overall_rating"
-              label={`Overall — manager said ${review?.managerOverallRating ?? "—"}`}
-            />
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Comments</label>
-              <textarea
-                name="founder_comments"
-                rows={3}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
-              />
-            </div>
-            <button
-              type="submit"
-              className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-            >
-              Save founder review
-            </button>
-          </form>
+          <RatingForm
+            mode="founder"
+            employeeId={employee.id}
+            action={submitFounderReview}
+            managerKra={review?.kraRating ?? null}
+            managerBehavioral={review?.behavioralRating ?? null}
+            managerOverall={review?.managerOverallRating ?? null}
+          />
         </section>
       ) : review && (status === "founder_reviewed" || status === "finalized") ? (
         <section className="mb-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
@@ -214,35 +175,6 @@ export default async function ReviewDetailPage({
         </section>
       )}
     </main>
-  );
-}
-
-function RatingSelect({
-  name,
-  label,
-  required = false
-}: {
-  name: string;
-  label: string;
-  required?: boolean;
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700">{label}</label>
-      <select
-        name={name}
-        required={required}
-        defaultValue=""
-        className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
-      >
-        <option value="">{required ? "Select rating…" : "No change"}</option>
-        {ratingOptions.map((n) => (
-          <option key={n} value={n}>
-            {n} — {RATING_LABELS[n]}
-          </option>
-        ))}
-      </select>
-    </div>
   );
 }
 
